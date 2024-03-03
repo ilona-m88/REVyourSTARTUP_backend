@@ -6,7 +6,7 @@ These are the steps to follow to properly initialize this project:
     - command: `.venv/scripts/activate`
 
 3. Install dependencies
-    - command: `py pip install -r requirements.txt`
+    - command: `pip install -r requirements.txt`
     - IMPORTANT: If you decide to install any further dependencies for this project, make sure 
             to run the following command: `py -m pip freeze > requirements.txt`
 
