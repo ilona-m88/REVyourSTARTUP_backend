@@ -1,6 +1,9 @@
 .venv/
 venv/
 
+# Environment Variables for Database #
+.env
+
 # Django #
 *.log
 *.pot
