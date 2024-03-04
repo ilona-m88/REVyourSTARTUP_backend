@@ -2,5 +2,12 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
+    # Health Check Endpoint
     path('home/', HealthCheckAPIView.as_view()),
+    
+    # Registration Endpoint
+    path('register/', RegisterNewUserView.as_view()),
+    
+    # List all Users in the Database Endpoint
+    path('users/', ListAllUsersView.as_view()),
 ]
