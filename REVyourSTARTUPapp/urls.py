@@ -7,6 +7,9 @@ urlpatterns = [
     
     # Registration Endpoint
     path('register/', RegisterNewUserView.as_view()),
+
+    # Login Endpoint
+    path('login/', UserLoginView.as_view()),
     
     # List all Users in the Database Endpoint
     path('users/', ListAllUsersView.as_view()),
