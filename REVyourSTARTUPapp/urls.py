@@ -13,4 +13,7 @@ urlpatterns = [
     
     # List all Users in the Database Endpoint
     path('users/', ListAllUsersView.as_view()),
+
+    # Get a User from the database by id
+    path('users/<int:id>', GetUserByIDView.as_view()),
 ]

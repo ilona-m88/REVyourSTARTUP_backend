@@ -63,9 +63,15 @@ class UserLogoutView(APIView):
         username = request.data.get("username")
 
 
-
-
 class ListAllUsersView(ListAPIView):
     # Generic View for listing all users in the database
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+class GetUserByIDView(APIView):
+    # View demonstrating how to use a serializer to get a user by their id
+    def get(self, request, id):
+        user = get_object_or_404(User, id=id)
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
