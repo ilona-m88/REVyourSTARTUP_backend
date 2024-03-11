@@ -10,7 +10,7 @@ from rest_framework import status, generics
 
 class HealthCheckAPIView(APIView):
     def get(self, request):
-        response = {'Message': "Hello, World!"}
+        response = {'Message': "Hello, Yibran"}
         return Response(response, status=status.HTTP_200_OK)
 
 
