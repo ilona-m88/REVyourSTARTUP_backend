@@ -16,7 +16,19 @@ class HealthCheckAPIView(APIView):
     def get(self, request):
         response = {'Message': "Hello, World!"}
         return Response(response, status=status.HTTP_200_OK)
+    
 
+class MakeSuperUserView(APIView):
+    # This should only be used to make yourself a superuser in order to access the /admin functionality
+    def put(self, request):
+        username = request.data.get("username")
+        user = User.objects.get(username=username)
+
+        if user:
+            user.is_superuser = 1
+            user.is_staff = 1
+            user.save()
+            return Response(status=status.HTTP_202_ACCEPTED)
 
 class RegisterNewUserView(APIView):
     # Simple registration view using Djangos built-in User class
@@ -40,7 +52,7 @@ class UserLoginView(APIView):
         username = request.data.get("username")
         password = request.data.get("password")
 
-        user = authenticate(username=username, password=password)
+        user = authenticate(request, username=username, password=password)
         
         if user is not None:
             # Backend authenticated credentials
@@ -60,7 +72,8 @@ class UserLogoutView(APIView):
     # Simple Logout View
     # TODO: This should be finished once there is some functionality associated with cookies, session, etc..
     def post(self, request):
-        username = request.data.get("username")
+        logout(request)
+        return Response(status=status.HTTP_200_OK)
 
 
 class ListAllUsersView(ListAPIView):
