@@ -22,4 +22,6 @@ urlpatterns = [
 
     # Get a User from the database by id
     path('users/<int:id>', GetUserByIDView.as_view()),
+
+    path('form/', CreateMainFormView.as_view()),
 ]
