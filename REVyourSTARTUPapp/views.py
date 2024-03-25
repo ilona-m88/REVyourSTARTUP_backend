@@ -1,16 +1,14 @@
-from django.shortcuts import render
-from django.http import HttpRequest
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 
-from rest_framework.generics import get_object_or_404, ListAPIView, ListCreateAPIView
+from rest_framework.generics import get_object_or_404, ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, generics
+from rest_framework import status
 
 from .serializers import *
+from .dataparse import *
 
-# Create your views here.
 
 class HealthCheckAPIView(APIView):
     def get(self, request):
@@ -90,7 +88,6 @@ class GetUserByIDView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
 class CreateMainFormView(APIView):
     # View which allows the main form to be created and linked to a user's id
     # JSON
@@ -113,4 +110,160 @@ class CreateMainFormView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+
+class GetMainFormByUserView(APIView):
+    # View should be passed the User's id in the endpoint link, it will search for all the 
+    # MainForm's associated with that id, and return a list of all the MainForm objects corresponding
+    # to that specific User
+
+    def get(self, request, id):
+        try:
+            queryset = MainForm.objects.get(user_id=id)
+            serializer = MainFormSerializer(queryset)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except MainForm.DoesNotExist as error:
+            return Response(str(error), status=status.HTTP_404_NOT_FOUND)
+        
+    # The post request should contain the User's id in the enpoint link, and also have the "form_name"
+    # sent as a JSON, otherwise the response will be an error
+    def post(self, request, id):
+        form_name = request.data.get("form_name")
+        user = get_object_or_404(User, id=id)
+        if form_name:
+            serializer = MainFormSerializer(data={'user': user.id, 'form_name': form_name})
+        else:
+            error = "Error: field 'form_name' missing from request"
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class RevFormView(APIView):
+    # This view should handle the rev form in terms of GET, POST, PUT, and adhere to the JSON format
+    # given in dataStructure_RevForm.json
+
+    def post(self, request, mainform_id):
+        # Parse the JSON starting with the outer-most tags
+        valuation_data = request.data.get('valuationParameters')
+        reality_check = request.data.get('realityCheck1')
+        customer_segments_year3 = request.data.get('customerSegmentsYear3')
+        customer_segments_year2 = request.data.get('customerSegmentsYear2')
+        customer_segments_year1 = request.data.get('customerSegmentsYear1')
+
+        if valuation_data is None or reality_check is None or customer_segments_year3 is None or customer_segments_year2 is None or customer_segments_year1 is None:
+            # If either of these tags are missing, create an error and return a BAD_REQUEST Response
+            error = 'Invalid request: Data is either mislabeled or missing entirely'
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # Otherwise parse through the nested tags and create a serializer object for database 
+            # storage. Also, should check for the validation of the data being stored
+
+            # This is for testing pusposes only!
+            #data_dict = {'valuationParameters': valuation_data, 'realityCheck1': reality_check}
+
+            # This line is for parsing the json data in terms of the outer-most tags
+            rev_form_data_dict = flatten_revform_json(valuation_data, reality_check)
+
+            try:
+                # Use flattened data_dict to serialize and, if valid, save in the database
+                revform_serializer = RevFormSerializer(data=rev_form_data_dict)
+                if revform_serializer.is_valid():
+                    revform_serializer.save()
+
+                    # Parse through all 3 of the customer_segments, create the appropriate 
+                    # rev_form_row_index table, and all the corresponding revform_row tables
+
+                    # YEAR 1
+                    data_dict_year1 = flatten_revform_rows_json(customer_segments_year1, 'customerSegmentsYear1')
+                    rev_form_rows_index_year1_serializer = RevFormRowsIndexSerializer(data=data_dict_year1['RevFormRowsIndex'])
+                    if rev_form_rows_index_year1_serializer.is_valid():                      
+                        rev_form_rows_index_year1_serializer.save()
+                        rev_form_rows_index_year1_pk = rev_form_rows_index_year1_serializer.data['revform_rows_index_id']
+                        RevFormRowsIndex.objects.filter(revform_rows_index_id=rev_form_rows_index_year1_pk).update(rev_form=revform_serializer.data['rev_form_id'])
+                    else:
+                        return Response(rev_form_rows_index_year1_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+                    row_data_dict = data_dict_year1['RevFormRows']
+                    for key in row_data_dict.keys():
+                        rev_form_row_serializer = RevFormRowsSerializer(data=row_data_dict[key])
+                        if rev_form_row_serializer.is_valid():
+                            rev_form_row_serializer.save()
+                            rev_form_row_pk = rev_form_row_serializer.data['revform_rows_id']
+                            RevFormRows.objects.filter(revform_rows_id=rev_form_row_pk).update(revform_rows_index=rev_form_rows_index_year1_serializer.data['revform_rows_index_id'])
+                        else:
+                            error = "Row {} serializer failed to validate".format(key)
+                            error_response = {"Message": error, "Serializer": rev_form_row_serializer.errors}
+                            return Response(error_response, status=status.HTTP_400_BAD_REQUEST)
+
+                    # YEAR 2
+                    data_dict_year2 = flatten_revform_rows_json(customer_segments_year2, 'customerSegmentsYear2')
+                    rev_form_rows_index_year2_serializer = RevFormRowsIndexSerializer(data=data_dict_year2['RevFormRowsIndex'])
+                    if rev_form_rows_index_year2_serializer.is_valid():                      
+                        rev_form_rows_index_year2_serializer.save()
+                        rev_form_rows_index_year2_pk = rev_form_rows_index_year2_serializer.data['revform_rows_index_id']
+                        RevFormRowsIndex.objects.filter(revform_rows_index_id=rev_form_rows_index_year2_pk).update(rev_form=revform_serializer.data['rev_form_id'])
+                    else:
+                        return Response(rev_form_rows_index_year2_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+                    row_data_dict = data_dict_year2['RevFormRows']
+                    for key in row_data_dict.keys():
+                        rev_form_row_serializer = RevFormRowsSerializer(data=row_data_dict[key])
+                        if rev_form_row_serializer.is_valid():
+                            rev_form_row_serializer.save()
+                            rev_form_row_pk = rev_form_row_serializer.data['revform_rows_id']
+                            RevFormRows.objects.filter(revform_rows_id=rev_form_row_pk).update(revform_rows_index=rev_form_rows_index_year2_serializer.data['revform_rows_index_id'])
+                        else:
+                            error = "Row {} serializer failed to validate".format(key)
+                            error_response = {"Message": error, "Serializer": rev_form_row_serializer.errors}
+                            return Response(error_response, status=status.HTTP_400_BAD_REQUEST)
+                    
+                     # YEAR 3
+                    data_dict_year3 = flatten_revform_rows_json(customer_segments_year3, 'customerSegmentsYear3')
+                    rev_form_rows_index_year3_serializer = RevFormRowsIndexSerializer(data=data_dict_year3['RevFormRowsIndex'])
+                    if rev_form_rows_index_year3_serializer.is_valid():                      
+                        rev_form_rows_index_year3_serializer.save()
+                        rev_form_rows_index_year3_pk = rev_form_rows_index_year3_serializer.data['revform_rows_index_id']
+                        RevFormRowsIndex.objects.filter(revform_rows_index_id=rev_form_rows_index_year3_pk).update(rev_form=revform_serializer.data['rev_form_id'])
+                    else:
+                        return Response(rev_form_rows_index_year3_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+                    row_data_dict = data_dict_year3['RevFormRows']
+                    for key in row_data_dict.keys():
+                        rev_form_row_serializer = RevFormRowsSerializer(data=row_data_dict[key])
+                        if rev_form_row_serializer.is_valid():
+                            rev_form_row_serializer.save()
+                            rev_form_row_pk = rev_form_row_serializer.data['revform_rows_id']
+                            RevFormRows.objects.filter(revform_rows_id=rev_form_row_pk).update(revform_rows_index=rev_form_rows_index_year3_serializer.data['revform_rows_index_id'])
+                        else:
+                            error = "Row {} serializer failed to validate".format(key)
+                            error_response = {"Message": error, "Serializer": rev_form_row_serializer.errors}
+                            return Response(error_response, status=status.HTTP_400_BAD_REQUEST)
+
+
+                    # Update the appropriate MainForm with the newly created RevForm as a foreign key
+                    MainForm.objects.filter(main_form_id=mainform_id).update(rev_form=revform_serializer.data['rev_form_id'])
+                    return Response(revform_serializer.data, status=status.HTTP_201_CREATED)     
+                else:
+                    return Response(revform_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            except MainForm.DoesNotExist as exception:
+                return Response(str(exception), status=status.HTTP_404_NOT_FOUND)
+
+
+class TestRowFlattenEndpoint(APIView):
+    # THIS ENDPOINT IS FOR TEST PURPOSES ONLY!!
+
+    def post(self, request):
+        customer_segments_year3 = request.data.get('customerSegmentsYear3')
+        customer_segments_year2 = request.data.get('customerSegmentsYear2')
+        customer_segments_year1 = request.data.get('customerSegmentsYear1')
+
+        data_dict_year1 = flatten_revform_rows_json(customer_segments_year3, 'customerSegmentsYear3')
+
+        return Response(data_dict_year1, status=status.HTTP_202_ACCEPTED)
     

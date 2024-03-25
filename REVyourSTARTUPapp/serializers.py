@@ -14,3 +14,21 @@ class MainFormSerializer(serializers.ModelSerializer):
     class Meta:
         model = MainForm
         fields = '__all__'
+
+
+class RevFormSerializer(serializers.ModelSerializer):    
+    class Meta:
+        model = RevForm
+        fields = '__all__'
+
+
+class RevFormRowsIndexSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RevFormRowsIndex
+        fields = '__all__'
+
+
+class RevFormRowsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RevFormRows
+        fields = '__all__'

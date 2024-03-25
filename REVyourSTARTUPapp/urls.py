@@ -23,5 +23,15 @@ urlpatterns = [
     # Get a User from the database by id
     path('users/<int:id>', GetUserByIDView.as_view()),
 
+    # Initial Creation of a Main Form
     path('form/', CreateMainFormView.as_view()),
+
+    # POST: Create a new Main Form for user with id=id, GET: All Main Form's by a Users Id
+    path('form/<int:id>', GetMainFormByUserView.as_view()),
+
+    # RevForm endpoint
+    path('form/rev_form/<int:mainform_id>', RevFormView.as_view()),
+
+    # TEST ENDPOINT
+    path('test/', TestRowFlattenEndpoint.as_view()),
 ]
