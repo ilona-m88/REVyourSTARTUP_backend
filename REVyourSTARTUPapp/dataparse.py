@@ -63,3 +63,87 @@ def flatten_revform_rows_json(customer_segment, index_name):
         row_num += 1
     
     return {'RevFormRowsIndex': row_index_dict, 'RevFormRows': row_dict}
+
+
+def build_revform_json(revform, year1, year2, year3):
+    valuation_parameters = {
+        "lastYearTotalRevenue": revform.last_year_total_revenue,
+        "amountNeeded": revform.amount_needed,
+        "hit3YearGoals": {
+            "3years": {
+                "effectiveInterest": revform.three_years_effective_interest
+            },
+            "5years": {
+                "effectiveInterest": revform.five_years_effective_interest
+            },
+            "7years": {
+                "effectiveInterest": revform.seven_years_effective_interest
+            }
+        },
+        "revenueMultiplier": revform.revenue_multiplier,
+        "exitAmount": revform.exit_amount,
+        "exitYears": {
+            "year0": {
+                "percentage": revform.year0_percentage,
+                "revenue": revform.year0_revenue,
+                "ForceTo": revform.year0_force_to
+            },
+            "year1": {
+                "percentage": revform.year1_percentage,
+                "revenue": revform.year1_revenue,
+                "ForceTo": revform.year1_force_to
+            },
+            "year2": {
+                "percentage": revform.year2_percentage,
+                "revenue": revform.year2_revenue,
+                "ForceTo": revform.year2_force_to
+            },
+            "year3": {
+                "percentage": revform.year3_percentage,
+                "revenue": revform.year3_revenue,
+                "ForceTo": revform.year3_force_to
+            },
+            "year4": {
+                "percentage": revform.year4_percentage,
+                "revenue": revform.year4_revenue,
+                "ForceTo": revform.year4_force_to
+            },
+            "year5": {
+                "percentage": revform.year5_percentage,
+                "revenue": revform.year5_revenue,
+                "ForceTo": revform.year5_force_to
+            }
+        },
+        "equityPercentage": revform.equity_percentage,
+        "year3CompanyWorth": revform.year3_company_worth,
+        "exitRevenueMultiplier": revform.exit_revenue_multiplier,
+        "revenueNeededYear3": revform.revenue_needed_year3,
+        "growthProjection": revform.growth_projection
+    }
+
+    reality_check = {
+        "totalMarket": revform.total_market,
+        "capturedAtYear5": revform.captured_at_year5
+    }
+
+    return {"valuationParameters": valuation_parameters, "realityCheck1": reality_check, "customerSegmentsYear3": year3, "customerSegmentsYear2": year2, "customerSegmentsYear1": year1}
+
+
+def build_customer_segments_json(revform_index_data, revform_row_data):
+    rows = []
+    for i in range(len(revform_row_data)):
+        rows.append(
+            {
+                "segmentName": revform_row_data[i]["segment_name"],
+                "avgRevenuePerCustomer": float(revform_row_data[i]["avg_revenue_per_customer"]),
+                "quickModelingPercentage": revform_row_data[i]["quick_modeling_percentage"],
+                "revenue": float(revform_row_data[i]["revenue"]),
+                "customers": revform_row_data[i]["customers"],
+                "yourPercentage": revform_row_data[i]["your_percentage"],
+                "totalRevenue": float(revform_row_data[i]["total_revenue"])
+            }
+        )
+    
+    row_count = revform_index_data["row_count"]
+
+    return {"rowCount": row_count, "rows": rows}

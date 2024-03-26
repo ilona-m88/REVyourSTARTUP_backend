@@ -253,6 +253,52 @@ class RevFormView(APIView):
                     return Response(revform_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             except MainForm.DoesNotExist as exception:
                 return Response(str(exception), status=status.HTTP_404_NOT_FOUND)
+            
+
+    def get(self, request, mainform_id):
+        # Get the Main Form and the associated RevForm and RevFormIndex by the given mainform_id
+        try:
+            mainform = MainForm.objects.get(main_form_id=mainform_id)
+            revform = RevForm.objects.get(rev_form_id=mainform.rev_form.rev_form_id)
+            revform_index = RevFormRowsIndex.objects.filter(rev_form=revform.rev_form_id)
+        except Exception as exception:
+            return Response(str(exception), status=status.HTTP_404_NOT_FOUND)
+        
+        # Serialize the multiple RevFormIndex objects for parsing
+        revform_index_serializer = RevFormRowsIndexSerializer(revform_index, many=True)
+
+        # Parse the individual RevFormIndex Objects by their revform_rows_name and populate 
+        # new variables with the appropriate data
+        for i in range(len(revform_index_serializer.data)):
+            if revform_index_serializer.data[i]["revform_rows_name"] == "customerSegmentsYear1":
+                customer_segments_year1 = revform_index_serializer.data[i]
+            elif revform_index_serializer.data[i]["revform_rows_name"] == "customerSegmentsYear2":
+                customer_segments_year2 = revform_index_serializer.data[i]
+            elif revform_index_serializer.data[i]["revform_rows_name"] == "customerSegmentsYear3":
+                customer_segments_year3 = revform_index_serializer.data[i]
+
+        # Given each RevFormIndex, get all the related RevFormRow objects associated with it,
+        # serialize all of them, and then build the segment's "customerSegmentsYearx" json
+        try:
+            year1_rows = RevFormRows.objects.filter(revform_rows_index=customer_segments_year1["revform_rows_index_id"])
+            year1_rows_serializer = RevFormRowsSerializer(year1_rows, many=True)
+            year1_customer_segment_json = build_customer_segments_json(customer_segments_year1, year1_rows_serializer.data)
+
+            year2_rows = RevFormRows.objects.filter(revform_rows_index=customer_segments_year2["revform_rows_index_id"])
+            year2_rows_serializer = RevFormRowsSerializer(year2_rows, many=True)
+            year2_customer_segment_json = build_customer_segments_json(customer_segments_year2, year2_rows_serializer.data)
+            
+            year3_rows = RevFormRows.objects.filter(revform_rows_index=customer_segments_year3["revform_rows_index_id"])        
+            year3_rows_serializer = RevFormRowsSerializer(year3_rows, many=True)
+            year3_customer_segment_json = build_customer_segments_json(customer_segments_year3, year3_rows_serializer.data)
+        except Exception as exception:
+            return Response(str(exception), status=status.HTTP_404_NOT_FOUND)
+
+        # Pass the RevForm, and all the customerSegmentsYearx json's to be built into the correct
+        # response format
+        built_revform = build_revform_json(revform, year1_customer_segment_json, year2_customer_segment_json, year3_customer_segment_json)
+        return Response(built_revform, status=status.HTTP_200_OK)
+    
 
 
 class TestRowFlattenEndpoint(APIView):

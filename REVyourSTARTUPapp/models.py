@@ -106,7 +106,7 @@ class RevFormRowsIndex(models.Model):
     # all of the different row entries, which are not known at the time of revform creation.
 
     revform_rows_index_id = models.AutoField(primary_key=True)
-    rev_form= models.ForeignKey(RevForm, on_delete=models.CASCADE, blank=True, null=True)
+    rev_form= models.ForeignKey(RevForm, on_delete=models.CASCADE, blank=True, null=True, related_name='rev_form')
 
     # This name can correlate to "customerSegmentsYear3" or "customerSegmentsYear1" etc...
     revform_rows_name = models.CharField(max_length=255)
