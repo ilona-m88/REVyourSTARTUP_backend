@@ -13,6 +13,7 @@ class MainForm(models.Model):
     user = models.ForeignKey(User, models.DO_NOTHING)
     form_name = models.CharField(blank=True, null=True, max_length=255)
     rev_form = models.ForeignKey('RevForm', on_delete=models.CASCADE, blank=True, null=True)
+    pro_forma = models.ForeignKey('ProForma', on_delete=models.CASCADE, blank=True, null=True)
 
     created = models.DateTimeField(default=timezone.now)
     last_update = models.DateTimeField(default=timezone.now)
@@ -79,14 +80,6 @@ class RevForm(models.Model):
     total_market = models.DecimalField(max_digits=12, decimal_places=2)
     captured_at_year5 = models.IntegerField()
 
-    # "customerSegmentsYear3"
-    #customer_segments_year3 = models.ForeignKey('RevFormRowsIndex', models.DO_NOTHING, related_name='customer_segment_year3')
-
-    # "customerSegmentsYear2"
-    #customer_segments_year2 = models.ForeignKey('RevFormRowsIndex', models.DO_NOTHING, related_name='customer_segment_year2')
-
-    # "customerSegmentsYear1"
-    #customer_segments_year1 = models.ForeignKey('RevFormRowsIndex', models.DO_NOTHING, related_name='customer_segment_year1')
 
     created = models.DateTimeField(default=timezone.now)
     last_update = models.DateTimeField(default=timezone.now)
@@ -156,3 +149,128 @@ class RevFormRows(models.Model):
     class Meta:
         managed = True
         db_table = 'revform_rows'
+
+
+class ProForma(models.Model):
+    # Main table for Pro Forma
+    pro_forma_id = models.AutoField(primary_key=True)
+    
+    # calendar
+    start_year = models.IntegerField()
+    start_month = models.IntegerField()
+    
+    start_capital = models.IntegerField()
+    
+    # foundersDraw
+    number_of_founders = models.IntegerField()
+    # founders list goes here
+
+    # profitFirst
+    #percentageOfIncomeDistributed
+    year1_pid = models.IntegerField()
+    year2_pid = models.IntegerField()
+    year3_pid = models.IntegerField()
+    year4_pid = models.IntegerField()
+    year5_pid = models.IntegerField()
+
+    include_investments = models.CharField(max_length=3)
+
+    # incomeAndExpenses
+    # years
+    year1_income = models.DecimalField(max_digits=12, decimal_places=2)
+    year1_distribution = models.DecimalField(max_digits=12, decimal_places=2)
+    year1_expenses = models.DecimalField(max_digits=12, decimal_places=2)
+    year1_margin = models.DecimalField(max_digits=12, decimal_places=2)
+    year2_income = models.DecimalField(max_digits=12, decimal_places=2)
+    year2_distribution = models.DecimalField(max_digits=12, decimal_places=2)
+    year2_expenses = models.DecimalField(max_digits=12, decimal_places=2)
+    year2_margin = models.DecimalField(max_digits=12, decimal_places=2)
+    year3_income = models.DecimalField(max_digits=12, decimal_places=2)
+    year3_distribution = models.DecimalField(max_digits=12, decimal_places=2)
+    year3_expenses = models.DecimalField(max_digits=12, decimal_places=2)
+    year3_margin = models.DecimalField(max_digits=12, decimal_places=2)
+    year4_income = models.DecimalField(max_digits=12, decimal_places=2)
+    year4_distribution = models.DecimalField(max_digits=12, decimal_places=2)
+    year4_expenses = models.DecimalField(max_digits=12, decimal_places=2)
+    year4_margin = models.DecimalField(max_digits=12, decimal_places=2)
+    year5_income = models.DecimalField(max_digits=12, decimal_places=2)
+    year5_distribution = models.DecimalField(max_digits=12, decimal_places=2)
+    year5_expenses = models.DecimalField(max_digits=12, decimal_places=2)
+    year5_margin = models.DecimalField(max_digits=12, decimal_places=2)
+
+    # cashFlow
+    exclude_depreciation = models.CharField(max_length=3)
+
+    # minimumCashOnHandPerYear
+    year1_first_negative_month = models.DecimalField(max_digits=12, decimal_places=2)
+    year1_first_negative_month_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    year1_minimum_this_year = models.DecimalField(max_digits=12, decimal_places=2)
+    year2_first_negative_month = models.DecimalField(max_digits=12, decimal_places=2)
+    year2_first_negative_month_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    year2_minimum_this_year = models.DecimalField(max_digits=12, decimal_places=2)
+    year3_first_negative_month = models.DecimalField(max_digits=12, decimal_places=2)
+    year3_first_negative_month_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    year3_minimum_this_year = models.DecimalField(max_digits=12, decimal_places=2)
+
+    # maxHeadCountPerYear
+    year1_founders = models.IntegerField()
+    year1_salaries = models.IntegerField()
+    year1_fulltime = models.IntegerField()
+    year1_parttime = models.IntegerField()
+    year2_founders = models.IntegerField()
+    year2_salaries = models.IntegerField()
+    year2_fulltime = models.IntegerField()
+    year2_parttime = models.IntegerField()
+    year3_founders = models.IntegerField()
+    year3_salaries = models.IntegerField()
+    year3_fulltime = models.IntegerField()
+    year3_parttime = models.IntegerField()
+    year4_founders = models.IntegerField()
+    year4_salaries = models.IntegerField()
+    year4_fulltime = models.IntegerField()
+    year4_parttime = models.IntegerField()
+    year5_founders = models.IntegerField()
+    year5_salaries = models.IntegerField()
+    year5_fulltime = models.IntegerField()
+    year5_parttime = models.IntegerField()
+
+
+    created = models.DateTimeField(default=timezone.now)
+    last_update = models.DateTimeField(default=timezone.now)
+
+    def save(self, *args, **kwargs):
+        self.last_update = timezone.now()
+        super(ProForma, self).save(*args, **kwargs)
+
+    class Meta:
+        managed = True
+        db_table = "pro_forma"
+
+
+class ProFormaFounders(models.Model):
+    pro_forma_founder_id = models.AutoField(primary_key=True)
+    pro_forma = models.ForeignKey(ProForma, on_delete=models.CASCADE)
+
+    name = models.CharField(max_length=255)
+    compensation_at_year3 = models.IntegerField()
+    year1_percent = models.IntegerField()
+    year1_total = models.DecimalField(max_digits=12, decimal_places=2)
+    year2_percent = models.IntegerField()
+    year2_total = models.DecimalField(max_digits=12, decimal_places=2)
+    year3_percent = models.IntegerField()
+    year3_total = models.DecimalField(max_digits=12, decimal_places=2)
+    year4_percent = models.IntegerField()
+    year4_total = models.DecimalField(max_digits=12, decimal_places=2)
+    year5_percent = models.IntegerField()
+    year5_total = models.DecimalField(max_digits=12, decimal_places=2)
+
+    created = models.DateTimeField(default=timezone.now)
+    last_update = models.DateTimeField(default=timezone.now)
+
+    def save(self, *args, **kwargs):
+        self.last_update = timezone.now()
+        super(ProFormaFounders, self).save(*args, **kwargs)
+
+    class Meta:
+        managed = True
+        db_table = "pro_forma_founders"
