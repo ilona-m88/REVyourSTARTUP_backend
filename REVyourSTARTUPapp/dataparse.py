@@ -240,3 +240,146 @@ def flatten_pro_forma_founders_json(pro_forma_founders_data):
 
     return founders_dict
 
+
+def build_pro_forma_json(pro_forma_data, founders_data):
+    pro_forma_dict = {
+        "proFormaStartupFactors": {
+            "calendar": {
+                "startYear": pro_forma_data['start_year'],
+                "startMonth": pro_forma_data['start_month']
+            },
+            "startCapital": pro_forma_data['start_capital'],
+            "foundersDraw": {
+                "numberOfFounders": pro_forma_data['number_of_founders'],
+                "founders": founders_data["founders"]
+            },
+            "profitFirst": {
+                "percentageOfIncomeDistributed": {
+                    "year1": pro_forma_data['year1_pid'],
+                    "year2": pro_forma_data['year2_pid'],
+                    "year3": pro_forma_data['year3_pid'],
+                    "year4": pro_forma_data['year4_pid'],
+                    "year5": pro_forma_data['year5_pid'],
+                },
+                "includeInvestments": pro_forma_data['include_investments']
+            },
+            "incomeAndExpenses": {
+                "years": {
+                    "year1": {
+                        "income": float(pro_forma_data['year1_income']),
+                        "distribution": float(pro_forma_data['year1_distribution']),
+                        "expenses": float(pro_forma_data['year1_expenses']),
+                        "margin": float(pro_forma_data['year1_margin'])
+                    },
+                    "year2": {
+                        "income": float(pro_forma_data['year2_income']),
+                        "distribution": float(pro_forma_data['year2_distribution']),
+                        "expenses": float(pro_forma_data['year2_expenses']),
+                        "margin": float(pro_forma_data['year2_margin'])
+                    },
+                    "year3": {
+                        "income": float(pro_forma_data['year3_income']),
+                        "distribution": float(pro_forma_data['year3_distribution']),
+                        "expenses": float(pro_forma_data['year3_expenses']),
+                        "margin": float(pro_forma_data['year3_margin'])
+                    },
+                    "year4": {
+                        "income": float(pro_forma_data['year4_income']),
+                        "distribution": float(pro_forma_data['year4_distribution']),
+                        "expenses": float(pro_forma_data['year4_expenses']),
+                        "margin": float(pro_forma_data['year4_margin'])
+                    },
+                    "year5": {
+                        "income": float(pro_forma_data['year5_income']),
+                        "distribution": float(pro_forma_data['year5_distribution']),
+                        "expenses": float(pro_forma_data['year5_expenses']),
+                        "margin": float(pro_forma_data['year5_margin'])
+                    }
+                }
+            },
+            "cashFlow": {
+                "excludeDepreciation": pro_forma_data['exclude_depreciation'],
+                "minimumCashOnHandPerYear": {
+                    "year1": {
+                        "firstNegativeMonth": float(pro_forma_data['year1_first_negative_month']),
+                        "firstNegativeMonthAmount": float(pro_forma_data['year1_first_negative_month_amount']),
+                        "minimumThisYear": float(pro_forma_data['year1_minimum_this_year'])
+                    },
+                    "year2": {
+                        "firstNegativeMonth": float(pro_forma_data['year2_first_negative_month']),
+                        "firstNegativeMonthAmount": float(pro_forma_data['year2_first_negative_month_amount']),
+                        "minimumThisYear": float(pro_forma_data['year2_minimum_this_year'])
+                    },
+                    "year3": {
+                        "firstNegativeMonth": float(pro_forma_data['year3_first_negative_month']),
+                        "firstNegativeMonthAmount": float(pro_forma_data['year3_first_negative_month_amount']),
+                        "minimumThisYear": float(pro_forma_data['year3_minimum_this_year'])
+                    }
+                }
+            },
+            "maxHeadCountPerYear": {
+                "year1": {
+                    "founders": pro_forma_data['year1_founders'],
+                    "salaries": pro_forma_data['year1_salaries'],
+                    "fulltime": pro_forma_data['year1_fulltime'],
+                    "parttime": pro_forma_data['year1_parttime']
+                },
+                "year2": {
+                    "founders": pro_forma_data['year2_founders'],
+                    "salaries": pro_forma_data['year2_salaries'],
+                    "fulltime": pro_forma_data['year2_fulltime'],
+                    "parttime": pro_forma_data['year2_parttime']
+                },
+                "year3": {
+                    "founders": pro_forma_data['year3_founders'],
+                    "salaries": pro_forma_data['year3_salaries'],
+                    "fulltime": pro_forma_data['year3_fulltime'],
+                    "parttime": pro_forma_data['year3_parttime']
+                },
+                "year4": {
+                    "founders": pro_forma_data['year4_founders'],
+                    "salaries": pro_forma_data['year4_salaries'],
+                    "fulltime": pro_forma_data['year4_fulltime'],
+                    "parttime": pro_forma_data['year4_parttime']
+                },
+                "year5": {
+                    "founders": pro_forma_data['year5_founders'],
+                    "salaries": pro_forma_data['year5_salaries'],
+                    "fulltime": pro_forma_data['year5_fulltime'],
+                    "parttime": pro_forma_data['year5_parttime']
+                }
+            }
+        }
+    }
+
+    return pro_forma_dict
+
+
+def build_pro_forma_founders_json(pro_forma_founders_data):
+    founders_dict = {
+        "name": pro_forma_founders_data['name'],
+        "compensationAtYear3": pro_forma_founders_data['compensation_at_year3'],
+        "year1": {
+            "year1percent": pro_forma_founders_data['year1_percent'],
+            "total": float(pro_forma_founders_data['year1_total']),
+        },
+        "year2": {
+            "year2percent": pro_forma_founders_data['year2_percent'],
+            "total": float(pro_forma_founders_data['year2_total'])
+        },
+        "year3": {
+            "year3percent": pro_forma_founders_data['year3_percent'],
+            "total": float(pro_forma_founders_data['year3_total'])
+        },
+        "year4": {
+            "year4percent": pro_forma_founders_data['year4_percent'],
+            "total": float(pro_forma_founders_data['year4_total'])
+        },
+        "year5": {
+            "year5percent": pro_forma_founders_data['year5_percent'],
+            "total": float(pro_forma_founders_data['year5_total'])
+        }
+    }
+
+    return founders_dict
+

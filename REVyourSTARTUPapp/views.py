@@ -338,6 +338,27 @@ class ProFormaView(APIView):
         return Response(pro_forma_serializer.data, status=status.HTTP_201_CREATED)
 
 
+    def get(self, request, mainform_id):
+        try:
+            main_form = MainForm.objects.get(main_form_id = mainform_id)
+            pro_forma = ProForma.objects.get(pro_forma_id=main_form.pro_forma.pro_forma_id)
+            pro_forma_founders = ProFormaFounders.objects.filter(pro_forma=pro_forma.pro_forma_id)
+        except Exception as exception:
+            return Response(str(exception), status=status.HTTP_404_NOT_FOUND)
+        
+        pro_forma_founders_serializer = ProFormaFoundersSerializer(pro_forma_founders, many=True)
+        founders_dict = {"founders": []}
+        for i in range(len(pro_forma_founders_serializer.data)):
+            founder_json = build_pro_forma_founders_json(pro_forma_founders_serializer.data[i])
+            founders_dict['founders'].append(founder_json)
+
+        pro_forma_serializer = ProFormaSerializer(pro_forma)
+
+        built_pro_forma = build_pro_forma_json(pro_forma_serializer.data, founders_dict)
+
+        return Response(built_pro_forma, status=status.HTTP_200_OK)
+    
+
 class TestRowFlattenEndpoint(APIView):
     # THIS ENDPOINT IS FOR TEST PURPOSES ONLY!!
 
