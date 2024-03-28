@@ -32,3 +32,16 @@ class RevFormRowsSerializer(serializers.ModelSerializer):
     class Meta:
         model = RevFormRows
         fields = '__all__'
+
+
+class ProFormaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProForma
+        fields = '__all__'
+
+
+class ProFormaFoundersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProFormaFounders
+        fields = '__all__'
+        

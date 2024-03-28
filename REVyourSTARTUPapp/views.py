@@ -300,6 +300,43 @@ class RevFormView(APIView):
         return Response(built_revform, status=status.HTTP_200_OK)
     
 
+class ProFormaView(APIView):
+    def post(self, request, mainform_id):
+        pro_forma_startup_factors = request.data.get("proFormaStartupFactors")
+        founders_list = pro_forma_startup_factors["foundersDraw"]["founders"]
+
+        if pro_forma_startup_factors is None:
+            # If this tag is missing, create an error and return a BAD_REQUEST Response
+            error = 'Invalid request: Data is either mislabeled or missing entirely'
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            pro_forma_data_dict = flatten_pro_forma_json(pro_forma_startup_factors)
+
+            pro_forma_serializer = ProFormaSerializer(data=pro_forma_data_dict)
+            if pro_forma_serializer.is_valid():
+                pro_forma_serializer.save()
+
+                num_founders = pro_forma_startup_factors["foundersDraw"]["numberOfFounders"]
+
+                for i in range(num_founders):
+                    founders_data_dict = flatten_pro_forma_founders_json(founders_list[i])
+                    founders_serializer = ProFormaFoundersSerializer(data=founders_data_dict)
+                    if founders_serializer.is_valid():
+                        founders_serializer.save()
+                        founders_pk = founders_serializer.data['pro_forma_founder_id']
+                        ProFormaFounders.objects.filter(pro_forma_founder_id=founders_pk).update(pro_forma=pro_forma_serializer.data['pro_forma_id'])
+
+                    else:
+                        return Response(founders_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                
+                MainForm.objects.filter(main_form_id=mainform_id).update(pro_forma=pro_forma_serializer.data['pro_forma_id'])
+                
+            else:
+                return Response(pro_forma_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                
+
+        return Response(pro_forma_serializer.data, status=status.HTTP_201_CREATED)
+
 
 class TestRowFlattenEndpoint(APIView):
     # THIS ENDPOINT IS FOR TEST PURPOSES ONLY!!

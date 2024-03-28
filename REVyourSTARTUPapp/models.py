@@ -249,7 +249,7 @@ class ProForma(models.Model):
 
 class ProFormaFounders(models.Model):
     pro_forma_founder_id = models.AutoField(primary_key=True)
-    pro_forma = models.ForeignKey(ProForma, on_delete=models.CASCADE)
+    pro_forma = models.ForeignKey(ProForma, on_delete=models.CASCADE, blank=True, null=True)
 
     name = models.CharField(max_length=255)
     compensation_at_year3 = models.IntegerField()

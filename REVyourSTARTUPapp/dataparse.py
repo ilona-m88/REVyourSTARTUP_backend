@@ -147,3 +147,96 @@ def build_customer_segments_json(revform_index_data, revform_row_data):
     row_count = revform_index_data["row_count"]
 
     return {"rowCount": row_count, "rows": rows}
+
+
+def flatten_pro_forma_json(pro_forma_startup_factors):
+    calendar = pro_forma_startup_factors["calendar"]
+    profit_first = pro_forma_startup_factors["profitFirst"]
+    income_and_expenses = pro_forma_startup_factors["incomeAndExpenses"]
+    cash_flow = pro_forma_startup_factors["cashFlow"]
+    max_headcount_per_year = pro_forma_startup_factors["maxHeadCountPerYear"]
+
+    pro_forma_dict = {
+        'start_year': calendar["startYear"],
+        'start_month': calendar["startMonth"],
+        'start_capital': pro_forma_startup_factors["startCapital"],
+        'number_of_founders': pro_forma_startup_factors["foundersDraw"]["numberOfFounders"],
+        'year1_pid': profit_first["percentageOfIncomeDistributed"]["year1"],
+        'year2_pid': profit_first["percentageOfIncomeDistributed"]["year2"],
+        'year3_pid': profit_first["percentageOfIncomeDistributed"]["year3"],
+        'year4_pid': profit_first["percentageOfIncomeDistributed"]["year4"],
+        'year5_pid': profit_first["percentageOfIncomeDistributed"]["year5"],
+        'include_investments': profit_first["includeInvestments"],
+        'year1_income': income_and_expenses["years"]["year1"]["income"],
+        'year1_distribution': income_and_expenses["years"]["year1"]["distribution"],
+        'year1_expenses': income_and_expenses["years"]["year1"]["expenses"],
+        'year1_margin': income_and_expenses["years"]["year1"]["margin"],
+        'year2_income': income_and_expenses["years"]["year2"]["income"],
+        'year2_distribution': income_and_expenses["years"]["year2"]["distribution"],
+        'year2_expenses': income_and_expenses["years"]["year2"]["expenses"],
+        'year2_margin': income_and_expenses["years"]["year2"]["margin"],
+        'year3_income': income_and_expenses["years"]["year3"]["income"],
+        'year3_distribution': income_and_expenses["years"]["year3"]["distribution"],
+        'year3_expenses': income_and_expenses["years"]["year3"]["expenses"],
+        'year3_margin': income_and_expenses["years"]["year3"]["margin"],
+        'year4_income': income_and_expenses["years"]["year4"]["income"],
+        'year4_distribution': income_and_expenses["years"]["year4"]["distribution"],
+        'year4_expenses': income_and_expenses["years"]["year4"]["expenses"],
+        'year4_margin': income_and_expenses["years"]["year4"]["margin"],
+        'year5_income': income_and_expenses["years"]["year5"]["income"],
+        'year5_distribution': income_and_expenses["years"]["year5"]["distribution"],
+        'year5_expenses': income_and_expenses["years"]["year5"]["expenses"],
+        'year5_margin': income_and_expenses["years"]["year5"]["margin"],
+        'exclude_depreciation': cash_flow["excludeDepreciation"],
+        'year1_first_negative_month': cash_flow["minimumCashOnHandPerYear"]["year1"]["firstNegativeMonth"],
+        'year1_first_negative_month_amount': cash_flow["minimumCashOnHandPerYear"]["year1"]["firstNegativeMonthAmount"],
+        'year1_minimum_this_year': cash_flow["minimumCashOnHandPerYear"]["year1"]["minimumThisYear"],
+        'year2_first_negative_month': cash_flow["minimumCashOnHandPerYear"]["year2"]["firstNegativeMonth"],
+        'year2_first_negative_month_amount': cash_flow["minimumCashOnHandPerYear"]["year2"]["firstNegativeMonthAmount"],
+        'year2_minimum_this_year': cash_flow["minimumCashOnHandPerYear"]["year2"]["minimumThisYear"],
+        'year3_first_negative_month': cash_flow["minimumCashOnHandPerYear"]["year3"]["firstNegativeMonth"],
+        'year3_first_negative_month_amount': cash_flow["minimumCashOnHandPerYear"]["year3"]["firstNegativeMonthAmount"],
+        'year3_minimum_this_year': cash_flow["minimumCashOnHandPerYear"]["year3"]["minimumThisYear"],
+        'year1_founders': max_headcount_per_year["year1"]["founders"],
+        'year1_salaries': max_headcount_per_year["year1"]["salaries"],
+        'year1_fulltime': max_headcount_per_year["year1"]["fulltime"],
+        'year1_parttime': max_headcount_per_year["year1"]["parttime"],
+        'year2_founders': max_headcount_per_year["year2"]["founders"],
+        'year2_salaries': max_headcount_per_year["year2"]["salaries"],
+        'year2_fulltime': max_headcount_per_year["year2"]["fulltime"],
+        'year2_parttime': max_headcount_per_year["year2"]["parttime"],
+        'year3_founders': max_headcount_per_year["year3"]["founders"],
+        'year3_salaries': max_headcount_per_year["year3"]["salaries"],
+        'year3_fulltime': max_headcount_per_year["year3"]["fulltime"],
+        'year3_parttime': max_headcount_per_year["year3"]["parttime"],
+        'year4_founders': max_headcount_per_year["year4"]["founders"],
+        'year4_salaries': max_headcount_per_year["year4"]["salaries"],
+        'year4_fulltime': max_headcount_per_year["year4"]["fulltime"],
+        'year4_parttime': max_headcount_per_year["year4"]["parttime"],
+        'year5_founders': max_headcount_per_year["year5"]["founders"],
+        'year5_salaries': max_headcount_per_year["year5"]["salaries"],
+        'year5_fulltime': max_headcount_per_year["year5"]["fulltime"],
+        'year5_parttime': max_headcount_per_year["year5"]["parttime"]
+    }
+
+    return pro_forma_dict
+
+
+def flatten_pro_forma_founders_json(pro_forma_founders_data):
+    founders_dict = {
+        'name': pro_forma_founders_data["name"],
+        'compensation_at_year3': pro_forma_founders_data["compensationAtYear3"],
+        'year1_percent': pro_forma_founders_data["year1"]["year1percent"],
+        'year1_total': pro_forma_founders_data["year1"]["total"],
+        'year2_percent': pro_forma_founders_data["year2"]["year2percent"],
+        'year2_total': pro_forma_founders_data["year2"]["total"],
+        'year3_percent': pro_forma_founders_data["year3"]["year3percent"],
+        'year3_total': pro_forma_founders_data["year3"]["total"],
+        'year4_percent': pro_forma_founders_data["year4"]["year4percent"],
+        'year4_total': pro_forma_founders_data["year4"]["total"],
+        'year5_percent': pro_forma_founders_data["year5"]["year5percent"],
+        'year5_total': pro_forma_founders_data["year5"]["total"]
+    }
+
+    return founders_dict
+
